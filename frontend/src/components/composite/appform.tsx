@@ -9,9 +9,11 @@ import { ComboBox } from "../ui/combobox";
 import { useState } from "react";
 import axios from "axios";
 import { Separator } from "../ui/separator";
+import { FormResult } from "./formResult";
 
 interface FormProps {
     className?: string;
+    onSubmit?: () => void;
 }
 
 interface PayeeInformation {
@@ -26,7 +28,7 @@ interface TransactionInformation {
     isFirstTime: boolean;
 }
 
-export function AppForm({ className }: FormProps) {
+export function AppForm({ className, onSubmit }: FormProps) {
     const [distance, setDistance] = useState<number | null>(null);
 
     // Payee Information
@@ -65,9 +67,16 @@ export function AppForm({ className }: FormProps) {
         }
     };
 
+    function handleSubmit(event: any){
+        event.preventDefault();
+        if (onSubmit) {
+            onSubmit();
+
+        }
+    }
     return (
         <div className={`${className}`}>
-            <form>
+            <form onSubmit={handleSubmit}>
                 <div className="grid w-full items-center gap-4">
                     {/* Payee Information text element */}
                     <div className="text-lg font-semibold text-gray-700">
@@ -176,6 +185,13 @@ export function AppForm({ className }: FormProps) {
                             <Label htmlFor="first_time">Yes</Label>
                         </div>
                     </div>
+                </div>
+                <div className="flex justify-center w-full mt-4">
+                    <button 
+                        className="bg-primary text-black px-4 py-2 rounded hover:bg-opacity-90" 
+                        type="submit">
+                        Submit
+                    </button>
                 </div>
             </form>
         </div>

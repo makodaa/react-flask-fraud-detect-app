@@ -65,6 +65,7 @@ body {
     place-items: center;
     min-width: 320px;
     min-height: 100vh;
+    overflow-y: auto; /* Enable vertical scrolling */
 }
 
 h1 {
@@ -81,6 +82,11 @@ button {
     font-family: inherit;
     background-color: #fffbfb;
     cursor: pointer;
+    transition: border-color 0.25s;
+}
+#submit-button{
+    background-color: #fffbfb;
+    color: #000000;
     transition: border-color 0.25s;
 }
 button:hover {
@@ -182,5 +188,30 @@ button:focus-visible {
     }
     body {
         @apply bg-background text-foreground;
+    }
+}
+
+/* Add responsive container */
+.container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+/* Add responsive grid */
+@media (max-width: 768px) {
+    .grid {
+        grid-template-columns: 1fr !important;
+    }
+    
+    .md\:grid-cols-2,
+    .md\:grid-cols-3 {
+        grid-template-columns: 1fr !important;
+    }
+    
+    /* Ensure proper padding on mobile */
+    #root {
+        padding: 1rem;
     }
 }

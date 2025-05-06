@@ -43,8 +43,8 @@ export function FormResult({ className, formData, isSubmitted }: FormProps) {
 
     if (loading) {
         return (
-            <div className="w-full p-6 mt-6 bg-gray-50 rounded-lg shadow-sm animate-pulse">
-                <div className="flex items-center justify-center h-40">
+            <div className="bg-white rounded-lg shadow-sm p-6 flex items-center justify-center h-full">
+                <div className="flex items-center justify-center">
                     <div className="text-lg text-gray-500">Analyzing transaction...</div>
                 </div>
             </div>
@@ -53,7 +53,7 @@ export function FormResult({ className, formData, isSubmitted }: FormProps) {
 
     if (error) {
         return (
-            <div className="w-full p-6 mt-6 bg-red-50 rounded-lg shadow-sm">
+            <div className="bg-white rounded-lg shadow-sm p-6">
                 <div className="flex flex-col items-center justify-center gap-2">
                     <div className="text-lg font-semibold text-red-600">Analysis Error</div>
                     <p className="text-red-500">{error}</p>
@@ -67,16 +67,14 @@ export function FormResult({ className, formData, isSubmitted }: FormProps) {
     }
 
     return (
-        <div className={`result-container w-full mt-8 bg-gray-50 rounded-lg shadow-md overflow-hidden ${className || ''}`}>
-            <div className="bg-primary p-4">
-                <h2 className="text-xl font-bold text-white">Transaction Analysis Results</h2>
-            </div>
+        <div className={`bg-white rounded-lg shadow-sm p-6 overflow-auto ${className || ''}`}>
+            <h2 className="text-xl font-bold mb-6">Transaction Analysis Results</h2>
             
-            <div className="p-6">
+            <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {/* Classification Result */}
-                    <div className={`bg-white rounded-lg shadow p-5 border-l-4 border-solid 
-                        ${result.fraudulent ? 'border-red-500' : 'border-green-500'}`}>
+                    <div className={`p-4 rounded-lg border-l-4 border-solid 
+                        ${result.fraudulent ? 'border-red-500 bg-red-50' : 'border-green-500 bg-green-50'}`}>
                         <h3 className="text-lg font-semibold text-gray-700 mb-3">Classification</h3>
                         <div className={`text-2xl font-bold ${result.fraudulent ? 'text-red-600' : 'text-green-600'}`}>
                             {result.fraudulent ? '⚠️ Fraudulent' : '✅ Not Fraudulent'}
@@ -89,7 +87,7 @@ export function FormResult({ className, formData, isSubmitted }: FormProps) {
                     </div>
                     
                     {/* Confidence Level */}
-                    <div className="bg-white rounded-lg shadow p-5">
+                    <div className="p-4 rounded-lg bg-gray-50">
                         <h3 className="text-lg font-semibold text-gray-700 mb-3">Confidence Level</h3>
                         <div className="flex items-end gap-2">
                             <div className="text-2xl font-bold">{result.confidence}%</div>
@@ -104,27 +102,41 @@ export function FormResult({ className, formData, isSubmitted }: FormProps) {
                 </div>
                 
                 {/* Transaction Details */}
-                <div className="mt-6 bg-white rounded-lg shadow p-5">
+                <div className="p-4 rounded-lg bg-gray-50">
                     <h3 className="text-lg font-semibold text-gray-700 mb-3">Transaction Details</h3>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div>
+                        <div className="flex flex-col space-y-1.5">
                             <p className="text-sm text-gray-500">Distance from Home</p>
-                            <p className="font-medium">{formData.distance.toFixed(2)} km</p>
+                            <div className="p-2 bg-gray-100 rounded">
+                                <span className="font-medium">{formData.distance.toFixed(2)} km</span>
+                            </div>
                         </div>
-                        <div>
+                        <div className="flex flex-col space-y-1.5">
                             <p className="text-sm text-gray-500">Payment Method</p>
-                            <p className="font-medium capitalize">{formData.transactionInformation.paymentMode}</p>
+                            <div className="p-2 bg-gray-100 rounded">
+                                <span className="font-medium capitalize">{formData.transactionInformation.paymentMode}</span>
+                            </div>
                         </div>
-                        <div>
+                        <div className="flex flex-col space-y-1.5">
                             <p className="text-sm text-gray-500">Transaction Amount</p>
-                            <p className="font-medium">₱{formData.transactionInformation.orderAmount?.toFixed(2)}</p>
+                            <div className="p-2 bg-gray-100 rounded">
+                                <span className="font-medium">₱{formData.transactionInformation.orderAmount?.toFixed(2)}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                        <div className="flex flex-col space-y-1.5">
+                            <p className="text-sm text-gray-500">First Time Buyer</p>
+                            <div className="p-2 bg-gray-100 rounded">
+                                <span className="font-medium">{formData.transactionInformation.isFirstTime ? "Yes" : "No"}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
                 
                 {/* Decision Tree Visualization */}
                 {result.tree_visualization && (
-                    <div className="mt-6 bg-white rounded-lg shadow p-5">
+                    <div className="p-4 rounded-lg bg-gray-50">
                         <h3 className="text-lg font-semibold text-gray-700 mb-3">Decision Process Visualization</h3>
                         <p className="text-sm text-gray-500 mb-4">
                             This visualization shows a sample decision tree from the Random Forest model.
@@ -161,7 +173,7 @@ export function FormResult({ className, formData, isSubmitted }: FormProps) {
                 
                 {/* Feature Importance */}
                 {result.feature_importance && (
-                    <div className="mt-6 bg-white rounded-lg shadow p-5">
+                    <div className="p-4 rounded-lg bg-gray-50">
                         <h3 className="text-lg font-semibold text-gray-700 mb-3">Feature Importance</h3>
                         <div className="space-y-3">
                             {Object.entries(result.feature_importance)

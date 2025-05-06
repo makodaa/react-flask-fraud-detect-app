@@ -185,143 +185,146 @@ export function AppForm({ className, onSubmit }: FormProps) {
     // Update the return statement with a side-by-side layout
     return (
         <div className={`${className} w-full max-w-full overflow-visible`}>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Form Section - Left Side */}
-                <div className="w-full">
-                    <form onSubmit={handleSubmit} className="w-full overflow-visible">
-                        <div className="grid w-full items-center gap-4">
-                            {/* Payee Information text element */}
-                            <div className="text-lg font-semibold text-gray-700">
-                                Payee Information
-                            </div>
-                            <div className="flex flex-col space-y-1.5">
-                                <Label htmlFor="home">Home Address</Label>
-                                <ComboBox
-                                    id="home"
-                                    placeholder="Home Address"
-                                    onChange={(value: string) =>
-                                        setPayeeInformation((prev) => ({
-                                            ...prev,
-                                            homeAddress: value,
-                                        }))
-                                    }
-                                />
-                            </div>
-                            <div className="flex flex-col space-y-1.5">
-                                <Label htmlFor="median_spending">
-                                    Average Spending
-                                </Label>
-                                <Input 
-                                    id="cost" 
-                                    placeholder="00.00" 
-                                    value={payeeInformation.averageSpending ?? ''} 
-                                    onChange={(e) => handleNumberInput(e, setPayeeInformation, 'averageSpending')}
-                                />
-                            </div>
-                            <Separator />
-                            <div className="text-lg font-semibold text-gray-700">
-                                Transaction Information
-                            </div>
-                            <div className="flex flex-col space-y-1.5">
-                                <Label htmlFor="order">Order Amount</Label>
-                                <Input
-                                    id="order"
-                                    placeholder="00.00"
-                                    value={transactionInformation.orderAmount ?? ''}
-                                    onChange={(e) => handleNumberInput(e, setTransactionInformation, 'orderAmount')}
-                                />
-                            </div>
-                            <div className="flex flex-col space-y-1.5">
-                                <Label htmlFor="payment_mode">Payment Mode</Label>
-                                <RadioGroup
-                                    value={transactionInformation.paymentMode || ""}
-                                    className="flex flex-col space-y-1"
-                                    onValueChange={(value) =>
-                                        setTransactionInformation((prev) => ({
-                                            ...prev,
-                                            paymentMode: value,
-                                        }))
-                                    }
-                                >
-                                    <div className="flex items-center space-x-2">
-                                        <RadioGroupItem value="chip" id="chip" />
-                                        <Label htmlFor="chip">Chip</Label>
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                        <RadioGroupItem value="pin" id="pin" />
-                                        <Label htmlFor="pin">PIN</Label>
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                        <RadioGroupItem value="online" id="online" />
-                                        <Label htmlFor="online">Online</Label>
-                                    </div>
-                                </RadioGroup>
-                            </div>
-                            <div className="flex flex-col space-y-1.5">
-                                <Label htmlFor="orderAddress">Order Address</Label>
-                                <ComboBox
-                                    id="orderAddress"
-                                    placeholder="Order Address"
-                                    onChange={(value: string) =>
-                                        setTransactionInformation((prev) => ({
-                                            ...prev,
-                                            orderAddress: value,
-                                        }))
-                                    }
-                                />
-                            </div>
-                            <div className="flex flex-col space-y-1.5">
-                                <Label htmlFor="location">
-                                    Location During Transaction
-                                </Label>
-                                <ComboBox
-                                    id="location"
-                                    placeholder="Location"
-                                    onChange={(value: string) =>
-                                        setTransactionInformation((prev) => ({
-                                            ...prev,
-                                            personLocation: value,
-                                        }))
-                                    }
-                                />
-                            </div>
-                            <div className="flex flex-col space-y-1.5">
-                                <Label htmlFor="first_time">First Time User</Label>
+            <div className="w-full">
+                <form onSubmit={handleSubmit} className="w-full overflow-visible">
+                    <div className="grid w-full items-center gap-4">
+                        {/* Payee Information text element */}
+                        <div className="text-lg font-semibold text-gray-700">
+                            Payee Information
+                        </div>
+                        <div className="flex flex-col space-y-1.5">
+                            <Label htmlFor="home">Home Address</Label>
+                            <ComboBox
+                                id="home"
+                                placeholder="Home Address"
+                                onChange={(value: string) =>
+                                    setPayeeInformation((prev) => ({
+                                        ...prev,
+                                        homeAddress: value,
+                                    }))
+                                }
+                            />
+                        </div>
+                        <div className="flex flex-col space-y-1.5">
+                            <Label htmlFor="median_spending">
+                                Average Spending
+                            </Label>
+                            <Input 
+                                id="cost" 
+                                placeholder="00.00" 
+                                value={payeeInformation.averageSpending ?? ''} 
+                                onChange={(e) => handleNumberInput(e, setPayeeInformation, 'averageSpending')}
+                            />
+                        </div>
+                        <Separator />
+                        <div className="text-lg font-semibold text-gray-700">
+                            Transaction Information
+                        </div>
+                        <div className="flex flex-col space-y-1.5">
+                            <Label htmlFor="order">Order Amount</Label>
+                            <Input
+                                id="order"
+                                placeholder="00.00"
+                                value={transactionInformation.orderAmount ?? ''}
+                                onChange={(e) => handleNumberInput(e, setTransactionInformation, 'orderAmount')}
+                            />
+                        </div>
+                        <div className="flex flex-col space-y-1.5">
+                            <Label htmlFor="payment_mode">Payment Mode</Label>
+                            <RadioGroup
+                                value={transactionInformation.paymentMode || ""}
+                                className="flex flex-col space-y-1"
+                                onValueChange={(value) =>
+                                    setTransactionInformation((prev) => ({
+                                        ...prev,
+                                        paymentMode: value,
+                                    }))
+                                }
+                            >
                                 <div className="flex items-center space-x-2">
-                                    <Checkbox
-                                        id="first_time"
-                                        checked={transactionInformation.isFirstTime}
-                                        onCheckedChange={(checked) =>
-                                            setTransactionInformation((prev) => ({
-                                                ...prev,
-                                                isFirstTime: checked == true,
-                                            }))
-                                        }
-                                    />
-                                    <Label htmlFor="first_time">Yes</Label>
+                                    <RadioGroupItem value="chip" id="chip" />
+                                    <Label htmlFor="chip">Chip</Label>
                                 </div>
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="pin" id="pin" />
+                                    <Label htmlFor="pin">PIN</Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="online" id="online" />
+                                    <Label htmlFor="online">Online</Label>
+                                </div>
+                            </RadioGroup>
+                        </div>
+                        <div className="flex flex-col space-y-1.5">
+                            <Label htmlFor="orderAddress">Order Address</Label>
+                            <ComboBox
+                                id="orderAddress"
+                                placeholder="Order Address"
+                                onChange={(value: string) =>
+                                    setTransactionInformation((prev) => ({
+                                        ...prev,
+                                        orderAddress: value,
+                                    }))
+                                }
+                            />
+                        </div>
+                        <div className="flex flex-col space-y-1.5">
+                            <Label htmlFor="location">
+                                Location During Transaction
+                            </Label>
+                            <ComboBox
+                                id="location"
+                                placeholder="Location"
+                                onChange={(value: string) =>
+                                    setTransactionInformation((prev) => ({
+                                        ...prev,
+                                        personLocation: value,
+                                    }))
+                                }
+                            />
+                        </div>
+                        <div className="flex flex-col space-y-1.5">
+                            <Label htmlFor="first_time">First Time Buyer</Label>
+                            <RadioGroup
+                                value={transactionInformation.isFirstTime ? "yes" : "no"}
+                                className="flex flex-col space-y-1"
+                                onValueChange={(value) =>
+                                    setTransactionInformation((prev) => ({
+                                        ...prev,
+                                        isFirstTime: value === "yes",
+                                    }))
+                                }
+                            >
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="yes" id="first_time_yes" />
+                                    <Label htmlFor="first_time_yes">Yes</Label>
+                                </div>
+                                <div className="flex items-center space-x-2">
+                                    <RadioGroupItem value="no" id="first_time_no" />
+                                    <Label htmlFor="first_time_no">No</Label>
+                                </div>
+                            </RadioGroup>
+                        </div>
+                        {distance !== null && !isSubmitted && (
+                            <div className="flex flex-col space-y-1.5">
+                                <Label>Distance from Home</Label>
+                                <div className="p-2 bg-gray-100 rounded">
+                                    <span className="font-semibold">{distance.toFixed(2)} km</span>
+                                </div>
+                                <p className="text-xs text-gray-500">
+                                    This is the calculated distance between home address and order address
+                                </p>
                             </div>
-                            {distance !== null && (
-                                <div className="flex flex-col space-y-1.5">
-                                    <Label>Distance from Home</Label>
-                                    <div className="p-2 bg-gray-100 rounded">
-                                        <span className="font-semibold">{distance.toFixed(2)} km</span>
-                                    </div>
-                                    <p className="text-xs text-gray-500">
-                                        This is the calculated distance between home address and order address
-                                    </p>
-                                </div>
-                            )}
-                        </div>
-                        <div className="flex justify-end w-full mt-8 mb-8">
-                            <button 
-                                className="bg-primary text-white px-6 py-2 rounded-md hover:bg-opacity-90 shadow-sm" 
-                                type="submit" id="submit-button">
-                                Submit Transaction
-                            </button>
-                        </div>
-                    </form>
-                </div>
+                        )}
+                    </div>
+                    <div className="flex justify-end w-full mt-8 mb-8">
+                        <button 
+                            className="bg-primary text-white px-6 py-2 rounded-md hover:bg-opacity-90 shadow-sm" 
+                            type="submit" id="submit-button">
+                            Submit Transaction
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     );

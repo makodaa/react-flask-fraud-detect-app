@@ -4,16 +4,14 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Checkbox } from "../ui/checkbox";
 import { ComboBox } from "../ui/combobox";
 import { useState } from "react";
 import axios from "axios";
 import { Separator } from "../ui/separator";
-import { FormResult } from "./formResult";
 
 interface FormProps {
     className?: string;
-    onSubmit?: (data: any) => void;  // Changed from () => void to (data: any) => void
+    onSubmit?: (data: any) => void; // Changed from () => void to (data: any) => void
 }
 
 interface PayeeInformation {
@@ -29,7 +27,11 @@ interface TransactionInformation {
 }
 
 export function AppForm({ className, onSubmit }: FormProps) {
-    const [distance, setDistance] = useState<number | null>(null);
+    const [distanceFromHome, setDistanceFromHome] = useState<number | null>(
+        null
+    );
+    const [distanceFromLastTransaction, setDistanceFromLastTransaction] =
+        useState<number | null>(null);
 
     // Payee Information
     const [payeeInformation, setPayeeInformation] = useState<PayeeInformation>({
@@ -49,83 +51,99 @@ export function AppForm({ className, onSubmit }: FormProps) {
 
     // Add these state variables after your other useState declarations
     const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
-    const [submittedData, setSubmittedData] = useState<any>(null);
 
     // Add this handler for numeric input validation
-    const handleNumberInput = (e: React.ChangeEvent<HTMLInputElement>, setter: Function, field: string) => {
+    const handleNumberInput = (
+        e: React.ChangeEvent<HTMLInputElement>,
+        setter: Function,
+        field: string
+    ) => {
         const value = e.target.value;
         // Only allow digits and decimal point
-        if (value === '' || /^\d+(\.\d*)?$/.test(value)) {
+        if (value === "" || /^\d+(\.\d*)?$/.test(value)) {
             setter((prev: any) => ({
                 ...prev,
-                [field]: value === '' ? null : parseFloat(value)
+                [field]: value === "" ? null : parseFloat(value),
             }));
         }
     };
 
     // Update with a proper API-based distance calculation
-    const calculateDistance = async () => {
+    const calculateDistance = async (origin: string, destination: string) => {
         // Prevent API calls with empty values
-        if (!payeeInformation.homeAddress || !transactionInformation.orderAddress) {
+        if (
+            !payeeInformation.homeAddress ||
+            !transactionInformation.orderAddress
+        ) {
             console.error("Home address or order address is missing");
             return null;
         }
-        
+
         try {
             // Try the API call first with a CORS proxy
             const apiKey = import.meta.env.VITE_DISTANCE_AI_API_KEY;
-            const origin = encodeURIComponent(payeeInformation.homeAddress);
-            const destination = encodeURIComponent(transactionInformation.orderAddress);
-            
+            const originUri = encodeURIComponent(origin);
+            const destinationUri = encodeURIComponent(destination);
+
             // Use alternative CORS proxy
             const corsProxyUrl = "https://api.allorigins.win/raw?url=";
-            const apiUrl = `https://api-v2.distancematrix.ai/maps/api/distancematrix/json?origins=${origin}&destinations=${destination}&key=${apiKey}`;
+            const apiUrl = `https://api-v2.distancematrix.ai/maps/api/distancematrix/json?origins=${originUri}&destinations=${destinationUri}&key=${apiKey}`;
             const proxiedUrl = `${corsProxyUrl}${encodeURIComponent(apiUrl)}`;
-            
+
             console.log("Attempting distance calculation via API...");
             const response = await axios.get(proxiedUrl);
             const data = response.data;
-            
-            if (data.rows && 
-                data.rows[0].elements && 
-                data.rows[0].elements[0].status === "OK" && 
-                data.rows[0].elements[0].distance) {
-                
-                const distanceValue = data.rows[0].elements[0].distance.value / 1000; // Convert to kilometers
-                console.log("API distance calculation successful:", distanceValue);
-                setDistance(distanceValue);
+
+            if (
+                data.rows &&
+                data.rows[0].elements &&
+                data.rows[0].elements[0].status === "OK" &&
+                data.rows[0].elements[0].distance
+            ) {
+                const distanceValue =
+                    data.rows[0].elements[0].distance.value / 1000; // Convert to kilometers
+                console.log(
+                    "API distance calculation successful:",
+                    distanceValue
+                );
                 return distanceValue;
             } else {
-                console.warn("API returned invalid format, using fallback method:", data);
+                console.warn(
+                    "API returned invalid format, using fallback method:",
+                    data
+                );
                 // Fallback to basic calculation if API fails
-                return fallbackDistanceCalculation();
+                return fallbackDistanceCalculation(origin, destination);
             }
         } catch (error) {
             console.error("Error fetching distance from API:", error);
             console.log("Falling back to basic distance calculation...");
-            return fallbackDistanceCalculation();
+            return fallbackDistanceCalculation(origin, destination);
         }
     };
 
     // Move the hard-coded distance logic to a fallback function
-    const fallbackDistanceCalculation = () => {
+    const fallbackDistanceCalculation = (
+        origin: string,
+        destination: string
+    ) => {
         try {
             // Create keys for lookup by normalizing city names
-            const city1 = payeeInformation.homeAddress?.toLowerCase().trim().split(',')[0] || '';
-            const city2 = transactionInformation.orderAddress?.toLowerCase().trim().split(',')[0] || '';
-            
-            console.log(`Fallback: Calculating distance between ${city1} and ${city2}`);
-            
+            const city1 = origin?.toLowerCase().trim().split(",")[0] || "";
+            const city2 = destination?.toLowerCase().trim().split(",")[0] || "";
+
+            console.log(
+                `Fallback: Calculating distance between ${city1} and ${city2}`
+            );
+
             // Simple check: if cities are the same, distance is minimal
             if (city1 === city2) {
                 const distanceValue = 5; // Default small distance for same city
-                setDistance(distanceValue);
                 return distanceValue;
             } else {
                 // Just a reasonable default distance for testing purposes
                 // In production, this should be replaced with a more accurate method
                 const distanceValue = 500; // Default large distance for different cities
-                setDistance(distanceValue);
                 return distanceValue;
             }
         } catch (err) {
@@ -137,48 +155,60 @@ export function AppForm({ className, onSubmit }: FormProps) {
     // Replace your existing handleSubmit with this improved version
     async function handleSubmit(event: React.FormEvent) {
         event.preventDefault();
-        
-        // Validate required fields
-        if (!payeeInformation.homeAddress || 
-            payeeInformation.averageSpending === null || 
-            !transactionInformation.orderAmount || 
-            !transactionInformation.orderAddress || 
-            !transactionInformation.paymentMode || 
-            !transactionInformation.personLocation) {
 
-            console.log(payeeInformation, transactionInformation)
+        // Validate required fields
+        if (
+            !payeeInformation.homeAddress ||
+            payeeInformation.averageSpending === null ||
+            !transactionInformation.orderAmount ||
+            !transactionInformation.orderAddress ||
+            !transactionInformation.paymentMode ||
+            !transactionInformation.personLocation
+        ) {
+            console.log(payeeInformation, transactionInformation);
             alert("Please fill in all required fields");
             return;
         }
-        
-        // Calculate distance only when submitting to minimize API calls
-        const calculatedDistance = await calculateDistance();
-        
-        if (calculatedDistance === null) {
-            alert("Could not calculate distance between addresses. Please check the addresses and try again.");
+
+        const calculatedDistanceFromHome = await calculateDistance(
+            payeeInformation.homeAddress,
+            transactionInformation.orderAddress
+        );
+        const calculatedDistanceFromTransaction = await calculateDistance(
+            transactionInformation.personLocation,
+            transactionInformation.orderAddress
+        );
+
+        setDistanceFromHome(calculatedDistanceFromHome);
+        setDistanceFromLastTransaction(calculatedDistanceFromTransaction);
+
+        if (calculatedDistanceFromHome === null) {
+            alert(
+                "Could not calculate distance between addresses. Please check the addresses and try again."
+            );
             return;
         }
-        
+
         // Create data object with all form data and calculated distance
         const formData = {
             payeeInformation: {
-                ...payeeInformation
+                ...payeeInformation,
             },
             transactionInformation: {
-                ...transactionInformation
+                ...transactionInformation,
             },
-            distance: calculatedDistance
+            distance_from_home: calculatedDistanceFromHome,
+            distance_from_last_transaction: calculatedDistanceFromTransaction,
         };
-        
+
         console.log("Form data to be submitted:", formData);
-        
+
         // Set the submitted data and flag for the FormResult component
-        setSubmittedData(formData);
         setIsSubmitted(true);
-        
+
         // Call the onSubmit callback with the formData if provided
         if (onSubmit) {
-            onSubmit(formData);  // Pass the formData to the onSubmit callback
+            onSubmit(formData); // Pass the formData to the onSubmit callback
         }
     }
 
@@ -186,7 +216,10 @@ export function AppForm({ className, onSubmit }: FormProps) {
     return (
         <div className={`${className} w-full max-w-full overflow-visible`}>
             <div className="w-full">
-                <form onSubmit={handleSubmit} className="w-full overflow-visible">
+                <form
+                    onSubmit={handleSubmit}
+                    className="w-full overflow-visible"
+                >
                     <div className="grid w-full items-center gap-4">
                         {/* Payee Information text element */}
                         <div className="text-lg font-semibold text-gray-700">
@@ -209,11 +242,17 @@ export function AppForm({ className, onSubmit }: FormProps) {
                             <Label htmlFor="median_spending">
                                 Average Spending
                             </Label>
-                            <Input 
-                                id="cost" 
-                                placeholder="00.00" 
-                                value={payeeInformation.averageSpending ?? ''} 
-                                onChange={(e) => handleNumberInput(e, setPayeeInformation, 'averageSpending')}
+                            <Input
+                                id="cost"
+                                placeholder="00.00"
+                                value={payeeInformation.averageSpending ?? ""}
+                                onChange={(e) =>
+                                    handleNumberInput(
+                                        e,
+                                        setPayeeInformation,
+                                        "averageSpending"
+                                    )
+                                }
                             />
                         </div>
                         <Separator />
@@ -225,8 +264,14 @@ export function AppForm({ className, onSubmit }: FormProps) {
                             <Input
                                 id="order"
                                 placeholder="00.00"
-                                value={transactionInformation.orderAmount ?? ''}
-                                onChange={(e) => handleNumberInput(e, setTransactionInformation, 'orderAmount')}
+                                value={transactionInformation.orderAmount ?? ""}
+                                onChange={(e) =>
+                                    handleNumberInput(
+                                        e,
+                                        setTransactionInformation,
+                                        "orderAmount"
+                                    )
+                                }
                             />
                         </div>
                         <div className="flex flex-col space-y-1.5">
@@ -250,7 +295,10 @@ export function AppForm({ className, onSubmit }: FormProps) {
                                     <Label htmlFor="pin">PIN</Label>
                                 </div>
                                 <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="online" id="online" />
+                                    <RadioGroupItem
+                                        value="online"
+                                        id="online"
+                                    />
                                     <Label htmlFor="online">Online</Label>
                                 </div>
                             </RadioGroup>
@@ -286,7 +334,11 @@ export function AppForm({ className, onSubmit }: FormProps) {
                         <div className="flex flex-col space-y-1.5">
                             <Label htmlFor="first_time">First Time Buyer</Label>
                             <RadioGroup
-                                value={transactionInformation.isFirstTime ? "yes" : "no"}
+                                value={
+                                    transactionInformation.isFirstTime
+                                        ? "yes"
+                                        : "no"
+                                }
                                 className="flex flex-col space-y-1"
                                 onValueChange={(value) =>
                                     setTransactionInformation((prev) => ({
@@ -296,31 +348,42 @@ export function AppForm({ className, onSubmit }: FormProps) {
                                 }
                             >
                                 <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="yes" id="first_time_yes" />
+                                    <RadioGroupItem
+                                        value="yes"
+                                        id="first_time_yes"
+                                    />
                                     <Label htmlFor="first_time_yes">Yes</Label>
                                 </div>
                                 <div className="flex items-center space-x-2">
-                                    <RadioGroupItem value="no" id="first_time_no" />
+                                    <RadioGroupItem
+                                        value="no"
+                                        id="first_time_no"
+                                    />
                                     <Label htmlFor="first_time_no">No</Label>
                                 </div>
                             </RadioGroup>
                         </div>
-                        {distance !== null && !isSubmitted && (
+                        {distanceFromHome !== null && !isSubmitted && (
                             <div className="flex flex-col space-y-1.5">
                                 <Label>Distance from Home</Label>
                                 <div className="p-2 bg-gray-100 rounded">
-                                    <span className="font-semibold">{distance.toFixed(2)} km</span>
+                                    <span className="font-semibold">
+                                        {distanceFromHome.toFixed(2)} km
+                                    </span>
                                 </div>
                                 <p className="text-xs text-gray-500">
-                                    This is the calculated distance between home address and order address
+                                    This is the calculated distance between home
+                                    address and order address
                                 </p>
                             </div>
                         )}
                     </div>
                     <div className="flex justify-end w-full mt-8 mb-8">
-                        <button 
-                            className="bg-primary text-white px-6 py-2 rounded-md hover:bg-opacity-90 shadow-sm" 
-                            type="submit" id="submit-button">
+                        <button
+                            className="bg-primary text-white px-6 py-2 rounded-md hover:bg-opacity-90 shadow-sm"
+                            type="submit"
+                            id="submit-button"
+                        >
                             Submit Transaction
                         </button>
                     </div>

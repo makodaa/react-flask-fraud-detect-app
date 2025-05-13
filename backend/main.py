@@ -5,6 +5,8 @@ import os
 import matplotlib
 import pandas as pd
 import requests
+from dotenv import load_dotenv
+load_dotenv()
 matplotlib.use('Agg')  # Use non-interactive backend
 
 app = Flask(__name__)
@@ -119,8 +121,11 @@ def get_distance():
         if not origin or not destination:
             return jsonify({"error": "Both origin and destination are required"}), 400
         
-        # Get API key from environment variable or use a config file
-        api_key = "CpvtwQQyRnCmEZ8nXZVLrceqZb7eZByLthUuADDF1a3FfKF11uFNbUvHJSUCwhqw"
+        # Get API key from environment variable
+        api_key = os.environ.get('DISTANCE_API_KEY')
+        if not api_key:
+            return jsonify({"error": "API key not configured"}), 500
+            
         url = f"https://api-v2.distancematrix.ai/maps/api/distancematrix/json?origins={origin}&destinations={destination}&key={api_key}"
         
         response = requests.get(url)

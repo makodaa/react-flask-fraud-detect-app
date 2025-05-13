@@ -4,6 +4,7 @@ import joblib
 import os
 import matplotlib
 import pandas as pd
+import requests
 matplotlib.use('Agg')  # Use non-interactive backend
 
 app = Flask(__name__)
@@ -106,6 +107,43 @@ def classify():
         return jsonify(result)
     
     except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/distance', methods=['POST'])
+def get_distance():
+    try:
+        data = request.json
+        origin = data.get('origin')
+        destination = data.get('destination')
+        
+        if not origin or not destination:
+            return jsonify({"error": "Both origin and destination are required"}), 400
+        
+        # Get API key from environment variable or use a config file
+        api_key = "CpvtwQQyRnCmEZ8nXZVLrceqZb7eZByLthUuADDF1a3FfKF11uFNbUvHJSUCwhqw"
+        url = f"https://api-v2.distancematrix.ai/maps/api/distancematrix/json?origins={origin}&destinations={destination}&key={api_key}"
+        
+        response = requests.get(url)
+        if response.status_code != 200:
+            return jsonify({"error": f"API request failed with status {response.status_code}"}), response.status_code
+        
+        result = response.json()
+        
+        # Extract the relevant distance information
+        if result.get('status') == 'OK':
+            rows = result.get('rows', [])
+            if rows and len(rows) > 0:
+                elements = rows[0].get('elements', [])
+                if elements and len(elements) > 0 and elements[0].get('status') == 'OK':
+                    distance_value = elements[0].get('distance', {}).get('value', 0)
+                    # Convert meters to kilometers
+                    distance_km = distance_value / 1000.0
+                    return jsonify({"distance": distance_km})
+        
+        return jsonify({"error": "Could not calculate distance"}), 400
+        
+    except Exception as e:
+        print(f"Error in distance API: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 

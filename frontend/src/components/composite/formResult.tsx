@@ -58,7 +58,7 @@ export function FormResult({ className, formData, isSubmitted }: FormProps) {
 
     if (error) {
         return (
-            <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="bg-white rounded-lg shadow-sm p-6 h-full flex flex-col items-center justify-center">
                 <div className="flex flex-col items-center justify-center gap-2">
                     <div className="text-lg font-semibold text-red-600">
                         Analysis Error
@@ -75,28 +75,28 @@ export function FormResult({ className, formData, isSubmitted }: FormProps) {
 
     return (
         <div
-            className={`bg-white rounded-lg shadow-sm p-6 overflow-auto ${
+            className={`bg-white rounded-lg shadow-sm p-6 flex flex-col h-full ${
                 className || ""
             }`}
         >
-            <h2 className="text-xl font-bold mb-6">
+            <h2 className="text-xl font-bold mb-6 flex-none">
                 Transaction Analysis Results
             </h2>
 
-            <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Classification Result */}
-                    <div
-                        className={`p-4 rounded-lg border-l-4 border-solid 
-                        ${
-                            result.fraudulent
-                                ? "border-red-500 bg-red-50"
-                                : "border-green-500 bg-green-50"
-                        }`}
-                    >
-                        <h3 className="text-lg font-semibold text-gray-700 mb-3">
-                            Classification
-                        </h3>
+            <div className="space-y-6 flex-grow flex flex-col">
+                {/* Classification - First Row */}
+                <div
+                    className={`p-4 rounded-lg border-l-4 border-solid flex-1
+                    ${
+                        result.fraudulent
+                            ? "border-red-500 bg-red-50"
+                            : "border-green-500 bg-green-50"
+                    }`}
+                >
+                    <h3 className="text-lg font-semibold text-gray-700 mb-3">
+                        Classification
+                    </h3>
+                    <div className="flex items-center">
                         <div
                             className={`text-2xl font-bold ${
                                 result.fraudulent
@@ -109,7 +109,7 @@ export function FormResult({ className, formData, isSubmitted }: FormProps) {
                                 : "✅ Not Fraudulent"}
                         </div>
                         <div
-                            className={`mt-2 text-sm ${
+                            className={`ml-4 text-sm ${
                                 result.fraudulent
                                     ? "text-red-500"
                                     : "text-green-500"
@@ -120,32 +120,30 @@ export function FormResult({ className, formData, isSubmitted }: FormProps) {
                                 : "This transaction appears to be legitimate"}
                         </div>
                     </div>
+                </div>
 
-                    {/* Confidence Level */}
-                    <div className="p-4 rounded-lg bg-gray-50">
-                        <h3 className="text-lg font-semibold text-gray-700 mb-3">
-                            Confidence Level
-                        </h3>
-                        <div className="flex items-end gap-2">
-                            <div className="text-2xl font-bold">
-                                {result.confidence}%
-                            </div>
+                {/* Confidence Level - Second Row */}
+                <div className="p-4 rounded-lg bg-gray-50 flex-1">
+                    <h3 className="text-lg font-semibold text-gray-700 mb-3">
+                        Confidence Level
+                    </h3>
+                    <div className="flex items-end gap-2">
+                        <div className="text-2xl font-bold">
+                            {result.confidence}%
                         </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2.5 mt-3">
-                            <div
-                                className={`h-2.5 rounded-full ${
-                                    result.fraudulent
-                                        ? "bg-red-500"
-                                        : "bg-green-500"
-                                }`}
-                                style={{ width: `${result.confidence}%` }}
-                            ></div>
-                        </div>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-2.5 mt-3">
+                        <div
+                            className={`h-2.5 rounded-full ${
+                                result.fraudulent ? "bg-red-500" : "bg-green-500"
+                            }`}
+                            style={{ width: `${result.confidence}%` }}
+                        ></div>
                     </div>
                 </div>
 
-                {/* Transaction Details */}
-                <div className="p-4 rounded-lg bg-gray-50">
+                {/* Transaction Details - Third Row */}
+                <div className="p-4 rounded-lg bg-gray-50 flex-1">
                     <h3 className="text-lg font-semibold text-gray-700 mb-3">
                         Transaction Details
                     </h3>
@@ -156,7 +154,9 @@ export function FormResult({ className, formData, isSubmitted }: FormProps) {
                             </p>
                             <div className="p-2 bg-gray-100 rounded">
                                 <span className="font-medium">
-                                    {formData.distance_from_home.toFixed(2)} km
+                                    {formData.distance_from_home !== undefined && formData.distance_from_home !== null
+                                        ? `${formData.distance_from_home.toFixed(2)} km`
+                                        : 'N/A'}
                                 </span>
                             </div>
                         </div>
@@ -166,10 +166,7 @@ export function FormResult({ className, formData, isSubmitted }: FormProps) {
                             </p>
                             <div className="p-2 bg-gray-100 rounded">
                                 <span className="font-medium capitalize">
-                                    {
-                                        formData.transactionInformation
-                                            .paymentMode
-                                    }
+                                    {formData.transactionInformation.paymentMode}
                                 </span>
                             </div>
                         </div>
@@ -179,10 +176,7 @@ export function FormResult({ className, formData, isSubmitted }: FormProps) {
                             </p>
                             <div className="p-2 bg-gray-100 rounded">
                                 <span className="font-medium">
-                                    ₱
-                                    {formData.transactionInformation.orderAmount?.toFixed(
-                                        2
-                                    )}
+                                    ₱{formData.transactionInformation.orderAmount?.toFixed(2)}
                                 </span>
                             </div>
                         </div>
@@ -197,6 +191,19 @@ export function FormResult({ className, formData, isSubmitted }: FormProps) {
                                     {formData.transactionInformation.isFirstTime
                                         ? "Yes"
                                         : "No"}
+                                </span>
+                            </div>
+                        </div>
+                        <div className="flex flex-col space-y-1.5">
+                            <p className="text-sm text-gray-500">
+                                Distance from Last Transaction
+                            </p>
+                            <div className="p-2 bg-gray-100 rounded">
+                                <span className="font-medium">
+                                    {formData.distance_from_last_transaction !== undefined && 
+                                     formData.distance_from_last_transaction !== null
+                                        ? `${formData.distance_from_last_transaction.toFixed(2)} km` 
+                                        : 'N/A'}
                                 </span>
                             </div>
                         </div>

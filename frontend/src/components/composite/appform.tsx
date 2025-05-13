@@ -70,55 +70,39 @@ export function AppForm({ className, onSubmit }: FormProps) {
 
     // Update with a proper API-based distance calculation
     const calculateDistance = async (origin: string, destination: string) => {
-        // Prevent API calls with empty values
-        if (
-            !payeeInformation.homeAddress ||
-            !transactionInformation.orderAddress
-        ) {
-            console.error("Home address or order address is missing");
-            return null;
-        }
-
+        console.log("Attempting distance calculation via API...");
         try {
-            // Try the API call first with a CORS proxy
-            const apiKey = import.meta.env.VITE_DISTANCE_AI_API_KEY;
-            const originUri = encodeURIComponent(origin);
-            const destinationUri = encodeURIComponent(destination);
+            const response = await fetch("http://localhost:5000/api/distance", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    origin: origin,
+                    destination: destination,
+                }),
+            });
 
-            // Use alternative CORS proxy
-            const corsProxyUrl = "https://api.allorigins.win/raw?url=";
-            const apiUrl = `https://api-v2.distancematrix.ai/maps/api/distancematrix/json?origins=${originUri}&destinations=${destinationUri}&key=${apiKey}`;
-            const proxiedUrl = `${corsProxyUrl}${encodeURIComponent(apiUrl)}`;
+            if (!response.ok) {
+                const errorText = await response.text();
+                console.error("API distance calculation failed:", errorText);
+                return null;
+            }
 
-            console.log("Attempting distance calculation via API...");
-            const response = await axios.get(proxiedUrl);
-            const data = response.data;
-
-            if (
-                data.rows &&
-                data.rows[0].elements &&
-                data.rows[0].elements[0].status === "OK" &&
-                data.rows[0].elements[0].distance
-            ) {
-                const distanceValue =
-                    data.rows[0].elements[0].distance.value / 1000; // Convert to kilometers
-                console.log(
-                    "API distance calculation successful:",
-                    distanceValue
-                );
-                return distanceValue;
+            const data = await response.json();
+            if (data.distance) {
+                console.log("API distance calculation successful:", data.distance);
+                return data.distance;
             } else {
-                console.warn(
-                    "API returned invalid format, using fallback method:",
-                    data
+                console.error(
+                    "API distance calculation failed:",
+                    data.error || "Unknown error"
                 );
-                // Fallback to basic calculation if API fails
-                return fallbackDistanceCalculation(origin, destination);
+                return null;
             }
         } catch (error) {
-            console.error("Error fetching distance from API:", error);
-            console.log("Falling back to basic distance calculation...");
-            return fallbackDistanceCalculation(origin, destination);
+            console.error("Error calculating distance:", error);
+            return null;
         }
     };
 
